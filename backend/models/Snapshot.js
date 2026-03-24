@@ -4,12 +4,15 @@ const SnapshotSchema = new mongoose.Schema({
     marketDate: { type: String, required: true }, // Format: YYYY-MM-DD
     timestamp: { type: String, required: true },  // Format: "23-Mar-2026 15:30:00"
     expiryDate: { type: String, required: true },
+    underlyingValue: Number,
     data: [{
         strikePrice: Number,
         ceOI: Number,
         ceLTP: Number,
+        ceVolume: Number,
         peOI: Number,
-        peLTP: Number
+        peLTP: Number,
+        peVolume: Number
     }],
     createdAt: { type: Date, default: Date.now }
 });

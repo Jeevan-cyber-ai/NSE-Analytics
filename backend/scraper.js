@@ -4,112 +4,96 @@ const Snapshot = require('./models/Snapshot');
 
 puppeteer.use(StealthPlugin());
 
-let browser = null;
 let lastTimestamp = null;
+let browser = null;
 
 async function scrapeNSE() {
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    const istTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + istOffset);
-    
-    const hours = istTime.getHours();
-    const minutes = istTime.getMinutes();
-    const currentTimeMinutes = hours * 60 + minutes;
-    const startTimeMinutes = 9 * 60 + 15; // 09:15
-    const endTimeMinutes = 15 * 60 + 30; // 15:30
-
-    // Market hours check (Mon-Fri)
-    const day = istTime.getDay();
-    if (day === 0 || day === 6 || currentTimeMinutes < startTimeMinutes || currentTimeMinutes > endTimeMinutes) {
-        console.log(`[SCRAPER] Market is CLOSED. Current IST: ${istTime.toLocaleTimeString('en-IN')}`);
-        // return; // Skip scraping outside market hours. Uncomment this line for production. For testing, let it pass.
-    }
-
-    console.log(`[SCRAPER] Scraping starting... IST: ${istTime.toLocaleTimeString('en-IN')}`);
+    const istTime = new Date(new Date().getTime() + (5.5 * 60 * 60 * 1000) + (new Date().getTimezoneOffset() * 60000));
+    console.log(`[SCRAPER] ── Run at IST: ${istTime.toLocaleTimeString('en-IN')} ──`);
 
     if (!browser) {
         browser = await puppeteer.launch({
-            headless: false, // Visible as requested
+            headless: "new",
             executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-            args: ['--start-maximized']
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
     }
 
+    const page = await browser.newPage();
     try {
-        const page = await browser.newPage();
-        await page.setViewport({ width: 1366, height: 768 });
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
         
-        await page.goto('https://www.nseindia.com/option-chain', {
-            waitUntil: 'networkidle2',
-            timeout: 60000
+        let apiPacket = null;
+
+        // Set up interception
+        await page.setRequestInterception(false); // We don't need to intercept the request, just the response
+
+        page.on('response', async (res) => {
+            const url = res.url();
+            // Be more flexible with the URL, as it might have dynamic tokens
+            if (url.includes('/api/') && url.includes('option') && res.status() === 200) {
+                try {
+                    const data = await res.json();
+                    if (data && data.records) {
+                        console.log(`[SCRAPER] Intercepted Packet from: ${url.split('?')[0]}`);
+                        apiPacket = data;
+                    }
+                } catch (e) {
+                    // Ignore non-json and errors
+                }
+            }
         });
 
-        await page.waitForSelector('#asOnText', { visible: true, timeout: 30000 });
-        const rawTimestamp = await page.evaluate(() => document.querySelector('#asOnText').innerText.trim());
-        const currentTS = rawTimestamp.replace(/As on |,/g, '').trim();
+        // Visit NSE page which triggers the API call
+        console.log('[SCRAPER] Navigating to Option Chain Page...');
+        await page.goto('https://www.nseindia.com/option-chain', { 
+            waitUntil: 'networkidle0', 
+            timeout: 90000 
+        });
 
-        if (currentTS === lastTimestamp) {
-            console.log(`[SCRAPER] Data already captured for timestamp: ${currentTS}`);
-            await page.close();
+        // Wait for the packet to be captured
+        for(let i=0; i<15 && !apiPacket; i++) {
+            await new Promise(r => setTimeout(r, 1000));
+        }
+
+        if (!apiPacket || !apiPacket.records) {
+            console.error('[SCRAPER] ❌ Failed to intercept API packet. Retrying on next interval.');
             return;
         }
 
-        console.log(`[SCRAPER] New timestamp detected: ${currentTS}. Processing data...`);
-
-        // Wait for table container
-        await page.waitForSelector('#optionChainTableContainer', { visible: true, timeout: 30000 });
-        
-        const scrapeData = await page.evaluate(() => {
-            const table = document.querySelector('#optionChainTableContainer table');
-            if (!table) return null;
-
-            const rows = Array.from(table.querySelectorAll('tbody tr')).slice(0, 150); // Get top 150 rows as requested
-            
-            return rows.map(row => {
-                const cols = row.querySelectorAll('td');
-                if (cols.length < 21) return null;
-                
-                return {
-                    strikePrice: parseFloat(cols[11]?.innerText.replace(/,/g, '')), // Strike price is usually at index 11
-                    ceOI: parseInt(cols[1]?.innerText.replace(/,/g, '')) || 0,
-                    ceLTP: parseFloat(cols[5]?.innerText.replace(/,/g, '')) || 0,
-                    peOI: parseInt(cols[21]?.innerText.replace(/,/g, '')) || 0, // Pe OI at end indices
-                    peLTP: parseFloat(cols[17]?.innerText.replace(/,/g, '')) || 0
-                };
-            }).filter(d => d !== null);
-        });
-
-        // Get expiry date from dropdown
-        const expiryDate = await page.evaluate(() => {
-            const dropdown = document.querySelector('#expirySelect');
-            return dropdown ? dropdown.options[dropdown.selectedIndex].text : 'N/A';
-        });
-
-        const marketDate = new Date().toISOString().split('T')[0];
-
-        if (scrapeData && scrapeData.length > 0) {
-            const snapshot = new Snapshot({
-                marketDate,
-                timestamp: currentTS,
-                expiryDate,
-                data: scrapeData
-            });
-
-            await snapshot.save();
-            console.log(`[SCRAPER] Successfully saved snapshot for ${currentTS}`);
-            lastTimestamp = currentTS;
+        const currentTS = apiPacket.records.timestamp;
+        if (currentTS === lastTimestamp) {
+            console.log(`[SCRAPER] Data for ${currentTS} already stored.`);
+            return;
         }
 
-        await page.close();
+        const rows = apiPacket.filtered?.data || apiPacket.records.data;
+        const expiryDate = rows[0]?.expiryDate || 'N/A';
+        const underlyingValue = apiPacket.records.underlyingValue;
+
+        const dataRows = rows
+            .filter(r => r.strikePrice)
+            .map(r => ({
+                strikePrice: r.strikePrice,
+                ceOI: r.CE?.openInterest || 0,
+                ceVolume: r.CE?.totalTradedVolume || 0,
+                ceLTP: r.CE?.lastPrice || 0,
+                peOI: r.PE?.openInterest || 0,
+                peVolume: r.PE?.totalTradedVolume || 0,
+                peLTP: r.PE?.lastPrice || 0,
+            }));
+
+        const marketDate = istTime.toISOString().split('T')[0];
+        const snapshot = new Snapshot({ marketDate, timestamp: currentTS, expiryDate, underlyingValue, data: dataRows });
+        await snapshot.save();
+
+        lastTimestamp = currentTS;
+        console.log(`[SCRAPER] ✅ SAVED PACKET: ${currentTS} (${dataRows.length} strikes)`);
+
     } catch (err) {
-        console.error(`[SCRAPER] Error: ${err.message}`);
+        console.error(`[SCRAPER] ❌ Error: ${err.message}`);
     } finally {
-        if (browser) {
-            // Keep browser open for visible debugging if needed, 
-            // but for a background scraper, we should close it to save resources.
-            // await browser.close(); 
-            // browser = null;
-        }
+        await page.close();
     }
 }
 

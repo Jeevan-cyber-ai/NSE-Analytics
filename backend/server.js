@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://user:pass@cluster0.mongodb.net/nse_data?retryWrites=true&w=majority';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://jeevan:Jeevan2006@cluster0.c9pcrro.mongodb.net/nse-analytics?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log('Connected to MongoDB Atlas'))
@@ -52,9 +52,9 @@ app.get('/api/timestamps', async (req, res) => {
         const timestamps = await Snapshot.find({ marketDate: date })
             .sort({ createdAt: -1 })
             .select('_id timestamp');
-        res.json(timestamps.length > 0 ? timestamps : [{_id: mockSnapshot._id, timestamp: mockSnapshot.timestamp}]);
+        res.json(timestamps.length > 0 ? timestamps : [{ _id: mockSnapshot._id, timestamp: mockSnapshot.timestamp }]);
     } catch (e) {
-        res.json([{_id: mockSnapshot._id, timestamp: mockSnapshot.timestamp}]); // Fallback
+        res.json([{ _id: mockSnapshot._id, timestamp: mockSnapshot.timestamp }]); // Fallback
     }
 });
 
@@ -73,8 +73,8 @@ app.get('/api/snapshot/:id', async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    
-    // Auto-run scraper every 60 seconds
-    setInterval(scrapeNSE, 60000);
+
+    // Auto-run scraper every 3 minutes
+    setInterval(scrapeNSE, 180000);
     scrapeNSE(); // Run initially
 });

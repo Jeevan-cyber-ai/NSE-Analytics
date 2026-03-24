@@ -13,16 +13,18 @@ const OptionTable = ({ data }) => {
         <table className="w-full text-left border-collapse min-w-[800px]">
           <thead className="sticky top-0 z-10 bg-slate-900 border-b border-white/5 shadow-md">
             <tr>
-              <th colSpan="2" className="py-4 px-6 text-center text-rose-400 bg-rose-500/10 border-r border-slate-700/50 uppercase tracking-widest text-xs font-bold">Calls</th>
+              <th colSpan="3" className="py-4 px-6 text-center text-rose-400 bg-rose-500/10 border-r border-slate-700/50 uppercase tracking-widest text-xs font-bold">Calls</th>
               <th className="py-4 px-6 text-center text-indigo-400 border-x border-slate-700/50 uppercase tracking-widest text-xs font-bold bg-indigo-500/5">Strike</th>
-              <th colSpan="2" className="py-4 px-6 text-center text-emerald-400 bg-emerald-500/10 border-l border-slate-700/50 uppercase tracking-widest text-xs font-bold">Puts</th>
+              <th colSpan="3" className="py-4 px-6 text-center text-emerald-400 bg-emerald-500/10 border-l border-slate-700/50 uppercase tracking-widest text-xs font-bold">Puts</th>
             </tr>
             <tr className="bg-slate-800/80 border-b border-white/5">
-              <th className="py-3 px-6 text-xs text-slate-500 uppercase font-bold tracking-wider">OI (Contracts)</th>
+              <th className="py-3 px-6 text-xs text-slate-500 uppercase font-bold tracking-wider">OI</th>
+              <th className="py-3 px-6 text-xs text-slate-500 uppercase font-bold tracking-wider">Volume</th>
               <th className="py-3 px-6 text-xs text-slate-500 uppercase font-bold border-r border-slate-700/50 tracking-wider">LTP</th>
               <th className="py-3 px-6 text-xs text-slate-500 uppercase font-bold border-x border-slate-700/50 text-center tracking-wider">Price Point</th>
               <th className="py-3 px-6 text-xs text-slate-500 uppercase font-bold border-l border-slate-700/50 tracking-wider">LTP</th>
-              <th className="py-3 px-6 text-xs text-slate-500 uppercase font-bold tracking-wider text-right">OI (Contracts)</th>
+              <th className="py-3 px-6 text-xs text-slate-500 uppercase font-bold tracking-wider">Volume</th>
+              <th className="py-3 px-6 text-xs text-slate-500 uppercase font-bold tracking-wider text-right">OI</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -44,6 +46,9 @@ const OptionTable = ({ data }) => {
                       {row.ceOI.toLocaleString()}
                     </span>
                   </td>
+                  <td className="py-4 px-6 text-slate-400 text-xs tabular-nums text-center">
+                    {row.ceVolume?.toLocaleString() || '-'}
+                  </td>
                   <td className="py-4 px-6 border-r border-white/5 font-mono text-rose-300 group-hover:text-rose-200 transition-colors">
                     $ {row.ceLTP.toFixed(2)}
                   </td>
@@ -59,6 +64,9 @@ const OptionTable = ({ data }) => {
                   {/* PE Columns */}
                   <td className="py-4 px-6 border-l border-white/5 font-mono text-emerald-300 group-hover:text-emerald-200 transition-colors">
                     $ {row.peLTP.toFixed(2)}
+                  </td>
+                  <td className="py-4 px-6 text-slate-400 text-xs tabular-nums text-center">
+                    {row.peVolume?.toLocaleString() || '-'}
                   </td>
                   <td className="py-4 px-6 text-slate-300 text-right tabular-nums">
                     <span className="flex items-center justify-end gap-2 group-hover:text-emerald-400 transition-colors">
