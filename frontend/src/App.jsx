@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from './components/Sidebar';
 import OptionTable from './components/OptionTable';
-import PCRCard from './components/PCRCard';
 
-const API_BASE_URL = 'http://localhost:5000/api'; // Update if needed
+const API_BASE_URL = 'http://localhost:5000/api';
 
 function App() {
   const [dates, setDates] = useState([]);
@@ -43,7 +42,7 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-900 text-white overflow-hidden">
+    <div className="flex bg-slate-900 text-white min-h-screen overflow-hidden">
       <Sidebar 
         dates={dates} 
         selectedDate={selectedDate} 
@@ -53,30 +52,23 @@ function App() {
         currentSnapshotId={selectedSnapshot?._id}
       />
       
-      <main className="flex-1 flex flex-col p-6 overflow-auto">
-        <header className="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-              NSE Option Chain Dashboard
-            </h1>
-            <p className="text-slate-400 mt-1">
-              {selectedSnapshot ? `Snapshot: ${selectedSnapshot.timestamp} (${selectedSnapshot.expiryDate} Expiry)` : 'Select a snapshot...'}
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <PCRCard data={selectedSnapshot?.data} />
-          </div>
-        </header>
-
+      <main className="flex-1 flex flex-col p-6 overflow-auto bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent)]">
         {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+          <div className="flex-1 flex flex-col items-center justify-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.3)]"></div>
+            <p className="text-slate-500 font-medium animate-pulse">Fetching snapshot details...</p>
           </div>
         ) : selectedSnapshot ? (
-          <OptionTable data={selectedSnapshot.data} />
+          <OptionTable data={selectedSnapshot} />
         ) : (
-          <div className="flex-1 flex items-center justify-center text-slate-500 italic">
-            Select a date and timestamp from the sidebar to view data.
+          <div className="flex-1 flex flex-col items-center justify-center text-slate-500 gap-4 text-center">
+             <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center border border-white/5 opacity-50">
+               <span className="text-3xl">📊</span>
+             </div>
+             <div>
+               <p className="font-bold text-slate-400">Welcome to NSE Option Chain Analytics</p>
+               <p className="text-sm">Select a date and timestamp from the sidebar to view historical data.</p>
+             </div>
           </div>
         )}
       </main>

@@ -75,12 +75,28 @@ async function scrapeNSE() {
             .filter(r => r.strikePrice)
             .map(r => ({
                 strikePrice: r.strikePrice,
+                // CE (Calls)
                 ceOI: r.CE?.openInterest || 0,
+                ceChngOI: r.CE?.changeinOpenInterest || 0,
                 ceVolume: r.CE?.totalTradedVolume || 0,
+                ceIV: r.CE?.impliedVolatility || 0,
                 ceLTP: r.CE?.lastPrice || 0,
-                peOI: r.PE?.openInterest || 0,
-                peVolume: r.PE?.totalTradedVolume || 0,
+                ceChng: r.CE?.change || 0,
+                ceBidQty: r.CE?.bidQty || 0,
+                ceBid: r.CE?.bidprice || 0,
+                ceAsk: r.CE?.askPrice || 0,
+                ceAskQty: r.CE?.askQty || 0,
+                // PE (Puts)
+                peBidQty: r.PE?.bidQty || 0,
+                peBid: r.PE?.bidprice || 0,
+                peAsk: r.PE?.askPrice || 0,
+                peAskQty: r.PE?.askQty || 0,
+                peChng: r.PE?.change || 0,
                 peLTP: r.PE?.lastPrice || 0,
+                peIV: r.PE?.impliedVolatility || 0,
+                peVolume: r.PE?.totalTradedVolume || 0,
+                peChngOI: r.PE?.changeinOpenInterest || 0,
+                peOI: r.PE?.openInterest || 0
             }));
 
         const marketDate = istTime.toISOString().split('T')[0];

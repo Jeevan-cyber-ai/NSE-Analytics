@@ -74,7 +74,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 
-    // Auto-run scraper every 3 minutes
-    setInterval(scrapeNSE, 180000);
+    // Auto-run scraper every 1 minute
+    setInterval(scrapeNSE, 60000);
     scrapeNSE(); // Run initially
 });
