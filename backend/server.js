@@ -1,5 +1,8 @@
 const path = require('path');
+// Load environment variables from backend/.env if it exists (for local dev)
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+// Also allow default behavior (for Render production)
+require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -15,16 +18,23 @@ app.use(express.json());
 const MONGO_URI = process.env.MONGO_URI;
 
 if (!MONGO_URI) {
-    console.error('❌ CRITICAL: MONGO_URI is missing in .env!');
+    console.error('❌ CRITICAL: MONGO_URI is missing in environment variables!');
     process.exit(1);
 }
 
-mongoose.connect(MONGO_URI)
-    .then(() => console.log('Connected to MongoDB Atlas'))
-    .catch(err => {
-        console.error('MongoDB connection error:', err.message);
-    });
+// Improved connection stability
+mongoose.connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 5000
+})
+.then(() => console.log('✅ Connected to MongoDB Atlas'))
+.catch(err => {
+    console.error('❌ MongoDB connection error:', err.message);
+});
 
+// Optional logging
+mongoose.connection.on("connected", () => {
+    console.log("🚀 MongoDB connection established");
+});
 
 // Mock data for development
 const mockSnapshot = {
@@ -41,7 +51,18 @@ const mockSnapshot = {
     }))
 };
 
+
 // API Routes
+app.get('/api/scrape', async (req, res) => {
+    try {
+        await scrapeNSE();
+        res.status(200).send("✅ Scraping completed successfully");
+    } catch (err) {
+        console.error("Manual Scraper Error:", err.message);
+        res.status(500).send("❌ Scraping failed: " + err.message);
+    }
+});
+
 app.get('/api/dates', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) throw new Error('DB NOT CONNECTED');
@@ -59,9 +80,9 @@ app.get('/api/timestamps', async (req, res) => {
         const timestamps = await Snapshot.find({ marketDate: date })
             .sort({ createdAt: -1 })
             .select('_id timestamp');
-        res.json(timestamps.length > 0 ? timestamps : [{ _id: mockSnapshot._id, timestamp: mockSnapshot.timestamp }]);
+        res.json(timestamps.length > 0 ? timestamps : [{ _id: mockSnapshot._id, timestamp: "23-Mar-2026 15:30:00" }]);
     } catch (e) {
-        res.json([{ _id: mockSnapshot._id, timestamp: mockSnapshot.timestamp }]); // Fallback
+        res.json([{ _id: mockSnapshot._id, timestamp: "23-Mar-2026 15:30:00" }]); // Fallback
     }
 });
 
@@ -79,9 +100,24 @@ app.get('/api/snapshot/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`📡 Server running on port ${PORT}`);
 
-    // Auto-run scraper every 1 minute
-    setInterval(scrapeNSE, 60000);
-    scrapeNSE(); // Run initially
+    // Safer approach (Keep the interval but with error handling)
+    console.log("⏱️  Automatic scraper interval starting (1 min)...");
+    setInterval(async () => {
+        try {
+            console.log("[CRON] Auto-triggering Scraper...");
+            await scrapeNSE();
+        } catch (err) {
+            console.error("❌ Auto-Scraper error:", err.message);
+        }
+    }, 60000);
+    
+    // Initial run with same safety
+    (async () => {
+       try {
+           await scrapeNSE();
+       } catch (e) {}
+    })();
 });
+

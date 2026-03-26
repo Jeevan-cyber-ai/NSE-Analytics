@@ -12,7 +12,7 @@ async function scrapeNSE() {
     console.log(`[SCRAPER] ── Run at IST: ${istTime.toLocaleTimeString('en-IN')} ──`);
 
     if (!browser) {
-        console.log(`[SCRAPER] Launching browser with path: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
+        console.log(`[SCRAPER] 🚀 Launching new browser instance...`);
         browser = await puppeteer.launch({
             headless: "new",
             executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
@@ -20,11 +20,15 @@ async function scrapeNSE() {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--single-process',
-                '--no-zygote'
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process', // Standard for Render
+                '--disable-gpu'
             ]
         });
     }
+
 
     const page = await browser.newPage();
     try {
