@@ -102,22 +102,49 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`📡 Server running on port ${PORT}`);
 
-    // Safer approach (Keep the interval but with error handling)
-    console.log("⏱️  Automatic scraper interval starting (1 min)...");
+    // --- NSE Market Hours Logic ---
+    const isMarketOpen = () => {
+        // Calculate current time in IST (UTC +5:30)
+        const now = new Date();
+        const istOffset = 5.5 * 60 * 60 * 1000;
+        const istTime = new Date(now.getTime() + istOffset + (now.getTimezoneOffset() * 60000));
+
+        const day = istTime.getDay(); // 0 = Sun, 6 = Sat
+        const hours = istTime.getHours();
+        const minutes = istTime.getMinutes();
+        const currentTimeMinutes = hours * 60 + minutes;
+
+        // Market is Open: Monday (1) to Friday (5)
+        const isWeekday = day >= 1 && day <= 5;
+        // Session: 9:00 AM (540 mins) to 4:00 PM (960 mins)
+        const isSessionTime = currentTimeMinutes >= 540 && currentTimeMinutes <= 960;
+
+        return isWeekday && isSessionTime;
+    };
+
+    console.log("⏱️  Automatic scraper scheduler starting (Checking every 1 min)...");
+    
     setInterval(async () => {
+        if (!isMarketOpen()) {
+            console.log(`[IDLE] ${new Date().toLocaleTimeString()} - Market is closed. Skipping scrape.`);
+            return;
+        }
+
         try {
-            console.log("[CRON] Auto-triggering Scraper...");
+            console.log("[CRON] Market is open. Auto-triggering Scraper...");
             await scrapeNSE();
         } catch (err) {
             console.error("❌ Auto-Scraper error:", err.message);
         }
     }, 60000);
     
-    // Initial run with same safety
+    // Initial run check
     (async () => {
-       try {
-           await scrapeNSE();
-       } catch (e) {}
+        if (isMarketOpen()) {
+            try { await scrapeNSE(); } catch (e) {}
+        } else {
+            console.log("⏭️  Initial check: Market is closed, skipping first scrape.");
+        }
     })();
 });
 
