@@ -5,7 +5,11 @@ frontend/node_modules/
 
 # Environment variables
 .env
-backend/.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+
 
 # Logs
 npm-debug.log*
@@ -20,7 +24,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
-
 # OS files
 .DS_Store
 Thumbs.db

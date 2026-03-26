@@ -1,4 +1,6 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,14 +12,19 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://jeevan:Jeevan2006@cluster0.c9pcrro.mongodb.net/nse-analytics?retryWrites=true&w=majority&appName=Cluster0';
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+    console.error('❌ CRITICAL: MONGO_URI is missing in .env!');
+    process.exit(1);
+}
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log('Connected to MongoDB Atlas'))
     .catch(err => {
         console.error('MongoDB connection error:', err.message);
-        console.log('Server will continue running. Please update MONGO_URI in .env');
     });
+
 
 // Mock data for development
 const mockSnapshot = {

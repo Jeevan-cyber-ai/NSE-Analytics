@@ -12,10 +12,17 @@ async function scrapeNSE() {
     console.log(`[SCRAPER] ── Run at IST: ${istTime.toLocaleTimeString('en-IN')} ──`);
 
     if (!browser) {
+        console.log(`[SCRAPER] Launching browser with path: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
         browser = await puppeteer.launch({
             headless: "new",
-            executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--single-process',
+                '--no-zygote'
+            ]
         });
     }
 

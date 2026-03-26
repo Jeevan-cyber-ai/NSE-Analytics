@@ -84,47 +84,49 @@ const OptionTable = ({ data }) => {
             {data.data.map((row, idx) => {
               const underlying = data.underlyingValue || 0;
               const isATM = Math.abs(underlying - row.strikePrice) < 50;
+              const isCallITM = row.strikePrice < underlying;
+              const isPutITM = row.strikePrice > underlying;
               
               return (
                 <tr key={idx} className={`text-center transition-all duration-150 group tabular-nums hover:bg-white/5 ${isATM ? 'bg-indigo-500/10' : ''}`}>
-                  {/* CALLS */}
-                  <td className="py-2 border-r border-white/5"><TrendingUp size={10} className="mx-auto text-indigo-500/40 group-hover:text-indigo-400" /></td>
-                  <td className="px-1 py-2 text-slate-300">{(row.ceOI || 0).toLocaleString()}</td>
-                  <td className={`px-1 py-2 ${row.ceChngOI >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {/* CALLS - ITM Highlighting */}
+                  <td className={`py-2 border-r border-white/5 ${isCallITM ? 'bg-yellow-500/5' : ''}`}><TrendingUp size={10} className="mx-auto text-indigo-500/40 group-hover:text-indigo-400" /></td>
+                  <td className={`px-1 py-2 text-slate-300 ${isCallITM ? 'bg-yellow-500/5' : ''}`}>{(row.ceOI || 0).toLocaleString()}</td>
+                  <td className={`px-1 py-2 ${row.ceChngOI >= 0 ? 'text-emerald-400' : 'text-rose-400'} ${isCallITM ? 'bg-yellow-500/5' : ''}`}>
                     {row.ceChngOI > 0 ? '+' : ''}{(row.ceChngOI || 0).toLocaleString()}
                   </td>
-                  <td className="px-1 py-2 text-slate-400/80">{(row.ceVolume || 0).toLocaleString()}</td>
-                  <td className="px-1 py-2 text-yellow-500/70">{row.ceIV || '-'}</td>
-                  <td className="px-1 py-2 text-white font-bold">{row.ceLTP?.toFixed(2) || '-'}</td>
-                  <td className={`px-1 py-2 ${row.ceChng >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <td className={`px-1 py-2 text-slate-400/80 ${isCallITM ? 'bg-yellow-500/5' : ''}`}>{(row.ceVolume || 0).toLocaleString()}</td>
+                  <td className={`px-1 py-2 text-yellow-500/70 ${isCallITM ? 'bg-yellow-500/5' : ''}`}>{row.ceIV || '-'}</td>
+                  <td className={`px-1 py-2 text-white font-bold ${isCallITM ? 'bg-yellow-500/5' : ''}`}>{row.ceLTP?.toFixed(2) || '-'}</td>
+                  <td className={`px-1 py-2 ${row.ceChng >= 0 ? 'text-emerald-400' : 'text-rose-400'} ${isCallITM ? 'bg-yellow-500/5' : ''}`}>
                     {row.ceChng >= 0 ? '+' : ''}{row.ceChng ? row.ceChng.toFixed(2) : '-'}
                   </td>
-                  <td className="px-1 py-2 text-slate-500 text-[9px]">{row.ceBidQty?.toLocaleString() || '-'}</td>
-                  <td className="px-1 py-2 text-indigo-300/80 font-medium">{row.ceBid?.toFixed(2) || '-'}</td>
-                  <td className="px-1 py-2 text-indigo-300/80 font-medium">{row.ceAsk?.toFixed(2) || '-'}</td>
-                  <td className="px-1 py-2 border-r border-white/5 text-slate-500 text-[9px]">{row.ceAskQty?.toLocaleString() || '-'}</td>
+                  <td className={`px-1 py-2 text-slate-500 text-[9px] ${isCallITM ? 'bg-yellow-500/5' : ''}`}>{row.ceBidQty?.toLocaleString() || '-'}</td>
+                  <td className={`px-1 py-2 text-indigo-300/80 font-medium ${isCallITM ? 'bg-yellow-500/5' : ''}`}>{row.ceBid?.toFixed(2) || '-'}</td>
+                  <td className={`px-1 py-2 text-indigo-300/80 font-medium ${isCallITM ? 'bg-yellow-500/5' : ''}`}>{row.ceAsk?.toFixed(2) || '-'}</td>
+                  <td className={`px-1 py-2 border-r border-white/5 text-slate-500 text-[9px] ${isCallITM ? 'bg-yellow-500/5' : ''}`}>{row.ceAskQty?.toLocaleString() || '-'}</td>
                   
                   {/* STRIKE */}
-                  <td className={`px-2 py-2 font-black border-x border-white/10 ${isATM ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-800/80 text-indigo-100 group-hover:bg-slate-700'}`}>
+                  <td className={`px-2 py-2 font-black border-x border-white/10 ${isATM ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 z-20 sticky' : 'bg-slate-800/80 text-indigo-100 group-hover:bg-slate-700'}`}>
                     {row.strikePrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </td>
 
-                  {/* PUTS */}
-                  <td className="px-1 py-2 border-l border-white/5 text-slate-500 text-[9px]">{row.peBidQty?.toLocaleString() || '-'}</td>
-                  <td className="px-1 py-2 text-rose-300/80 font-medium">{row.peBid?.toFixed(2) || '-'}</td>
-                  <td className="px-1 py-2 text-rose-300/80 font-medium">{row.peAsk?.toFixed(2) || '-'}</td>
-                  <td className="px-1 py-2 text-slate-500 text-[9px]">{row.peAskQty?.toLocaleString() || '-'}</td>
-                  <td className={`px-1 py-2 ${row.peChng >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {/* PUTS - ITM Highlighting */}
+                  <td className={`px-1 py-2 border-l border-white/5 text-slate-500 text-[9px] ${isPutITM ? 'bg-yellow-500/5' : ''}`}>{row.peBidQty?.toLocaleString() || '-'}</td>
+                  <td className={`px-1 py-2 text-rose-300/80 font-medium ${isPutITM ? 'bg-yellow-500/5' : ''}`}>{row.peBid?.toFixed(2) || '-'}</td>
+                  <td className={`px-1 py-2 text-rose-300/80 font-medium ${isPutITM ? 'bg-yellow-500/5' : ''}`}>{row.peAsk?.toFixed(2) || '-'}</td>
+                  <td className={`px-1 py-2 text-slate-500 text-[9px] ${isPutITM ? 'bg-yellow-500/5' : ''}`}>{row.peAskQty?.toLocaleString() || '-'}</td>
+                  <td className={`px-1 py-2 ${row.peChng >= 0 ? 'text-emerald-400' : 'text-rose-400'} ${isPutITM ? 'bg-yellow-500/5' : ''}`}>
                     {row.peChng >= 0 ? '+' : ''}{row.peChng ? row.peChng.toFixed(2) : '-'}
                   </td>
-                  <td className="px-1 py-2 text-white font-bold">{row.peLTP?.toFixed(2) || '-'}</td>
-                  <td className="px-1 py-2 text-yellow-500/70">{row.peIV || '-'}</td>
-                  <td className="px-1 py-2 text-slate-400/80">{(row.peVolume || 0).toLocaleString()}</td>
-                  <td className={`px-1 py-2 ${row.peChngOI >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <td className={`px-1 py-2 text-white font-bold ${isPutITM ? 'bg-yellow-500/5' : ''}`}>{row.peLTP?.toFixed(2) || '-'}</td>
+                  <td className={`px-1 py-2 text-yellow-500/70 ${isPutITM ? 'bg-yellow-500/5' : ''}`}>{row.peIV || '-'}</td>
+                  <td className={`px-1 py-2 text-slate-400/80 ${isPutITM ? 'bg-yellow-500/5' : ''}`}>{(row.peVolume || 0).toLocaleString()}</td>
+                  <td className={`px-1 py-2 ${row.peChngOI >= 0 ? 'text-emerald-400' : 'text-rose-400'} ${isPutITM ? 'bg-yellow-500/5' : ''}`}>
                     {row.peChngOI > 0 ? '+' : ''}{(row.peChngOI || 0).toLocaleString()}
                   </td>
-                  <td className="px-1 py-2 text-slate-300">{(row.peOI || 0).toLocaleString()}</td>
-                  <td className="py-2 border-l border-white/5"><TrendingDown size={10} className="mx-auto text-rose-500/40 group-hover:text-rose-400" /></td>
+                  <td className={`px-1 py-2 text-slate-300 ${isPutITM ? 'bg-yellow-500/5' : ''}`}>{(row.peOI || 0).toLocaleString()}</td>
+                  <td className={`py-2 border-l border-white/5 ${isPutITM ? 'bg-yellow-500/5' : ''}`}><TrendingDown size={10} className="mx-auto text-rose-500/40 group-hover:text-rose-400" /></td>
                 </tr>
               );
             })}
