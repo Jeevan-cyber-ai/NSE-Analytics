@@ -43,26 +43,26 @@ const PCRCard = ({ data }) => {
   const sentiment = getSentimentText(parseFloat(pcr));
 
   return (
-    <div className="flex gap-4 group">
+    <div className="flex gap-2 md:gap-4 group">
       {/* OI PCR */}
-      <div className="flex flex-col items-end px-6 py-3 bg-slate-800/80 rounded-2xl border border-white/5 shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 ring-1 ring-white/5 hover:ring-indigo-500/30">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pt-1">OI PCR</span>
+      <div className="flex flex-col items-end px-3 py-2 md:px-6 md:py-3 bg-slate-800/80 rounded-xl md:rounded-2xl border border-white/5 shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 ring-1 ring-white/5 hover:ring-indigo-500/30">
+        <div className="flex items-center gap-2 mb-0.5 md:mb-1">
+          <span className="text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest pt-0.5 md:pt-1">OI PCR</span>
           <div className="relative group/tooltip">
-              <Info size={10} className="text-slate-600 hover:text-slate-400 transition-colors cursor-help" />
-              <div className="absolute top-full right-0 mt-3 w-48 p-2 bg-slate-900 border border-slate-700 rounded-lg text-[10px] text-slate-400 invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all z-50 shadow-2xl">
+              <Info size={8} className="text-slate-600 hover:text-slate-400 transition-colors cursor-help md:w-[10px] md:h-[10px]" />
+              <div className="absolute top-full right-0 mt-3 w-40 md:w-48 p-2 bg-slate-900 border border-slate-700 rounded-lg text-[9px] md:text-[10px] text-slate-400 invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all z-50 shadow-2xl">
                 PCR (Open Interest) = Total Put OI / Total Call OI.
               </div>
           </div>
         </div>
-        <div className="flex items-end gap-3">
-          <div className="flex items-center gap-2">
-            {sentiment.icon}
-            <span className={`text-2xl font-black ${sentiment.color} drop-shadow-[0_0_12px_rgba(34,197,94,0.3)] tabular-nums`}>
+        <div className="flex items-end gap-1.5 md:gap-3">
+          <div className="flex items-center gap-1.5 md:gap-2">
+            {sentiment.icon && <span className="scale-75 md:scale-100">{sentiment.icon}</span>}
+            <span className={`text-lg md:text-2xl font-black ${sentiment.color} drop-shadow-[0_0_12px_rgba(34,197,94,0.3)] tabular-nums`}>
               {pcr}
             </span>
           </div>
-          <p className={`text-[10px] font-semibold ${sentiment.color} opacity-80 mb-1`}>
+          <p className={`text-[8px] md:text-[10px] font-semibold ${sentiment.color} opacity-80 mb-0.5 md:mb-1 hidden sm:block`}>
             {sentiment.text}
           </p>
         </div>

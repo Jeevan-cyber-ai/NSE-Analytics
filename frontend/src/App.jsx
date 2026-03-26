@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Menu, X } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import OptionTable from './components/OptionTable';
 
@@ -11,6 +12,7 @@ function App() {
   const [timestamps, setTimestamps] = useState([]);
   const [selectedSnapshot, setSelectedSnapshot] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Fetch initial dates
@@ -33,6 +35,7 @@ function App() {
 
   const fetchSnapshot = (id) => {
     setIsLoading(true);
+    setIsSidebarOpen(false); // Auto close sidebar on mobile after selection
     axios.get(`${API_BASE_URL}/snapshot/${id}`)
       .then(res => {
         setSelectedSnapshot(res.data);
@@ -42,7 +45,15 @@ function App() {
   };
 
   return (
-    <div className="flex bg-slate-900 text-white min-h-screen overflow-hidden">
+    <div className="flex bg-slate-900 text-white min-h-screen overflow-hidden relative">
+      {/* Sidebar Overlay for Mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 transition-all duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <Sidebar 
         dates={dates} 
         selectedDate={selectedDate} 
@@ -50,9 +61,27 @@ function App() {
         timestamps={timestamps}
         onSelectSnapshot={fetchSnapshot}
         currentSnapshotId={selectedSnapshot?._id}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
       
-      <main className="flex-1 flex flex-col p-6 overflow-auto bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent)]">
+      <main className="flex-1 flex flex-col p-4 md:p-6 overflow-auto bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent)]">
+        {/* Mobile Header with Toggle */}
+        <div className="lg:hidden flex items-center justify-between mb-4 bg-slate-800/50 p-3 rounded-xl border border-white/5 backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <span className="text-sm font-black">N</span>
+            </div>
+            <span className="font-bold text-sm tracking-tight">NSE Analytics</span>
+          </div>
+          <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 bg-slate-700/50 rounded-lg text-slate-300 hover:text-white"
+          >
+            <Menu size={20} />
+          </button>
+        </div>
+
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.3)]"></div>
@@ -67,7 +96,7 @@ function App() {
              </div>
              <div>
                <p className="font-bold text-slate-400">Welcome to NSE Option Chain Analytics</p>
-               <p className="text-sm">Select a date and timestamp from the sidebar to view historical data.</p>
+               <p className="text-sm px-4">Select a date and timestamp from the sidebar to view historical data.</p>
              </div>
           </div>
         )}

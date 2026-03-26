@@ -1,14 +1,26 @@
 import { useState } from 'react';
-import { Calendar, Clock, ChevronDown, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, ChevronDown, ChevronRight, X } from 'lucide-react';
 
-const Sidebar = ({ dates, selectedDate, onSelectDate, timestamps, onSelectSnapshot, currentSnapshotId }) => {
+const Sidebar = ({ dates, selectedDate, onSelectDate, timestamps, onSelectSnapshot, currentSnapshotId, isOpen, onClose }) => {
   return (
-    <aside className="w-80 bg-slate-800 border-r border-slate-700 flex flex-col h-full shadow-2xl">
+    <aside className={`
+      fixed inset-y-0 left-0 z-50 w-80 bg-slate-800 border-r border-slate-700 flex flex-col h-full shadow-2xl transition-transform duration-300 ease-in-out
+      lg:relative lg:translate-x-0 
+      ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+    `}>
       <div className="p-6 border-b border-slate-700">
-        <h2 className="text-xl font-bold flex items-center gap-2 mb-6">
-          <Calendar className="text-indigo-400" size={24} />
-          <span>Historical Logs</span>
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Calendar className="text-indigo-400" size={24} />
+            <span>Historical Logs</span>
+          </h2>
+          <button 
+            onClick={onClose}
+            className="lg:hidden p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white"
+          >
+            <X size={20} />
+          </button>
+        </div>
         
         <div className="relative">
           <select 
@@ -61,7 +73,7 @@ const Sidebar = ({ dates, selectedDate, onSelectDate, timestamps, onSelectSnapsh
       <div className="p-4 border-t border-slate-700 bg-slate-900/50">
         <div className="text-xs text-slate-500 flex justify-between items-center bg-slate-800/80 p-3 rounded-lg border border-slate-700/50">
           <span>Status:</span>
-          <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+          <span className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[10px] md:text-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             ACTIVE MONITOR
           </span>
