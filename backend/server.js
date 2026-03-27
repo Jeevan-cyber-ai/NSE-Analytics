@@ -104,20 +104,19 @@ app.listen(PORT, () => {
 
     // --- NSE Market Hours Logic ---
     const isMarketOpen = () => {
-        // Calculate current time in IST (UTC +5:30)
-        const now = new Date();
-        const istOffset = 5.5 * 60 * 60 * 1000;
-        const istTime = new Date(now.getTime() + istOffset + (now.getTimezoneOffset() * 60000));
+        // Calculate current time natively in IST
+        const istTimeString = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+        const istDate = new Date(istTimeString);
 
-        const day = istTime.getDay(); // 0 = Sun, 6 = Sat
-        const hours = istTime.getHours();
-        const minutes = istTime.getMinutes();
+        const day = istDate.getDay(); // 0 = Sun, 6 = Sat
+        const hours = istDate.getHours();
+        const minutes = istDate.getMinutes();
         const currentTimeMinutes = hours * 60 + minutes;
 
         // Market is Open: Monday (1) to Friday (5)
         const isWeekday = day >= 1 && day <= 5;
-        // Session: 9:00 AM (540 mins) to 4:00 PM (960 mins)
-        const isSessionTime = currentTimeMinutes >= 540 && currentTimeMinutes <= 960;
+        // Session: 9:00 AM (540 mins) to 3:30 PM (930 mins)
+        const isSessionTime = currentTimeMinutes >= 540 && currentTimeMinutes <= 930;
 
         return isWeekday && isSessionTime;
     };

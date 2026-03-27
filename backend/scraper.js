@@ -8,10 +8,11 @@ let lastTimestamp = null;
 let browser = null;
 
 async function scrapeNSE() {
-    const istTime = new Date(new Date().getTime() + (5.5 * 60 * 60 * 1000) + (new Date().getTimezoneOffset() * 60000));
+    const istTimeString = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+    const istTime = new Date(istTimeString);
     console.log(`[SCRAPER] ── Run at IST: ${istTime.toLocaleTimeString('en-IN')} ──`);
 
-    if (!browser) {
+    if (!browser || !browser.isConnected()) {
         console.log(`[SCRAPER] 🚀 Launching new browser instance...`);
         browser = await puppeteer.launch({
             headless: "new",
@@ -32,6 +33,7 @@ async function scrapeNSE() {
 
     const page = await browser.newPage();
     try {
+        await page.setCacheEnabled(false); // <--- DISABLE CACHE: Fixes stuck at yesterday issue
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
         
         let apiPacket = null;
@@ -110,7 +112,10 @@ async function scrapeNSE() {
                 peOI: r.PE?.openInterest || 0
             }));
 
-        const marketDate = istTime.toISOString().split('T')[0];
+        const year = istTime.getFullYear();
+        const month = String(istTime.getMonth() + 1).padStart(2, '0');
+        const day = String(istTime.getDate()).padStart(2, '0');
+        const marketDate = `${year}-${month}-${day}`;
         const snapshot = new Snapshot({ marketDate, timestamp: currentTS, expiryDate, underlyingValue, data: dataRows });
         await snapshot.save();
 
