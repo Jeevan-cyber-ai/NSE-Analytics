@@ -13,6 +13,7 @@ function App() {
   const [selectedSnapshot, setSelectedSnapshot] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLiveTracking, setIsLiveTracking] = useState(true); // Track if user is watching the latest
 
   useEffect(() => {
     // Fetch initial dates
@@ -23,19 +24,15 @@ function App() {
       });
   }, []);
 
-  useEffect(() => {
-    if (selectedDate) {
-      axios.get(`${API_BASE_URL}/timestamps?date=${selectedDate}`)
-        .then(res => {
-          setTimestamps(res.data);
-          if (res.data.length > 0) fetchSnapshot(res.data[0]._id);
-        });
+  const fetchSnapshot = (id, isUserClick = false) => {
+    if (isUserClick) {
+      // If user clicked manually, check if it's the latest one to enable/disable live tracking
+      const isLatest = timestamps.length > 0 && timestamps[0]._id === id;
+      setIsLiveTracking(isLatest);
+      setIsSidebarOpen(false); // Auto close sidebar on mobile after selection
     }
-  }, [selectedDate]);
-
-  const fetchSnapshot = (id) => {
+    
     setIsLoading(true);
-    setIsSidebarOpen(false); // Auto close sidebar on mobile after selection
     axios.get(`${API_BASE_URL}/snapshot/${id}`)
       .then(res => {
         setSelectedSnapshot(res.data);
@@ -43,6 +40,39 @@ function App() {
       })
       .catch(err => setIsLoading(false));
   };
+
+  useEffect(() => {
+    if (!selectedDate) return;
+
+    const fetchTimestamps = () => {
+      axios.get(`${API_BASE_URL}/timestamps?date=${selectedDate}`)
+        .then(res => {
+          setTimestamps(prev => {
+            const newTimestamps = res.data;
+            
+            // If we got new data and we are in live tracking mode, auto-fetch the new latest snapshot
+            if (newTimestamps.length > 0) {
+              const latestNewId = newTimestamps[0]._id;
+              const latestOldId = prev.length > 0 ? prev[0]._id : null;
+              
+              if (latestNewId !== latestOldId) {
+                // Only if it's the first load OR if user is actively live tracking
+                if (!latestOldId || isLiveTracking) {
+                  fetchSnapshot(latestNewId);
+                  setIsLiveTracking(true);
+                }
+              }
+            }
+            return newTimestamps;
+          });
+        });
+    };
+
+    fetchTimestamps(); // Fetch immediately
+    const interval = setInterval(fetchTimestamps, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [selectedDate, isLiveTracking]);
 
   return (
     <div className="flex bg-slate-900 text-white min-h-screen overflow-hidden relative">
