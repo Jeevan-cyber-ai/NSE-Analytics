@@ -16,7 +16,7 @@ async function scrapeNSE() {
         console.log(`[SCRAPER] 🚀 Launching new browser instance...`);
         browser = await puppeteer.launch({
             headless: "new",
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+            executablePath: process.env.RENDER ? undefined : (process.env.PUPPETEER_EXECUTABLE_PATH || undefined),
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
