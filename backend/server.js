@@ -26,10 +26,10 @@ if (!MONGO_URI) {
 mongoose.connect(MONGO_URI, {
     serverSelectionTimeoutMS: 5000
 })
-.then(() => console.log('✅ Connected to MongoDB Atlas'))
-.catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
-});
+    .then(() => console.log('✅ Connected to MongoDB Atlas'))
+    .catch(err => {
+        console.error('❌ MongoDB connection error:', err.message);
+    });
 
 // Optional logging
 mongoose.connection.on("connected", () => {
@@ -42,13 +42,26 @@ const mockSnapshot = {
     marketDate: "2026-03-23",
     timestamp: "23-Mar-2026 15:30:00",
     expiryDate: "26-Mar-2026",
-    data: Array.from({ length: 40 }, (_, i) => ({
-        strikePrice: 20000 + (i * 100),
-        ceOI: Math.floor(Math.random() * 500000),
-        ceLTP: Math.floor(Math.random() * 1000),
-        peOI: Math.floor(Math.random() * 500000),
-        peLTP: Math.floor(Math.random() * 1000)
-    }))
+    expiryDates: ["26-Mar-2026", "02-Apr-2026"],
+    underlyingValue: 22000,
+    data: [
+        ...Array.from({ length: 40 }, (_, i) => ({
+            strikePrice: 20000 + (i * 100),
+            expiryDate: "26-Mar-2026",
+            ceOI: Math.floor(Math.random() * 500000),
+            ceLTP: Math.floor(Math.random() * 1000),
+            peOI: Math.floor(Math.random() * 500000),
+            peLTP: Math.floor(Math.random() * 1000)
+        })),
+        ...Array.from({ length: 40 }, (_, i) => ({
+            strikePrice: 20000 + (i * 100),
+            expiryDate: "02-Apr-2026",
+            ceOI: Math.floor(Math.random() * 500000),
+            ceLTP: Math.floor(Math.random() * 1000),
+            peOI: Math.floor(Math.random() * 500000),
+            peLTP: Math.floor(Math.random() * 1000)
+        }))
+    ]
 };
 
 
@@ -122,7 +135,7 @@ app.listen(PORT, () => {
     };
 
     console.log("⏱️  Automatic scraper scheduler starting (Checking every 1 min)...");
-    
+
     setInterval(async () => {
         if (!isMarketOpen()) {
             console.log(`[IDLE] ${new Date().toLocaleTimeString()} - Market is closed. Skipping scrape.`);
@@ -136,11 +149,11 @@ app.listen(PORT, () => {
             console.error("❌ Auto-Scraper error:", err.message);
         }
     }, 60000);
-    
+
     // Initial run check
     (async () => {
         if (isMarketOpen()) {
-            try { await scrapeNSE(); } catch (e) {}
+            try { await scrapeNSE(); } catch (e) { }
         } else {
             console.log("⏭️  Initial check: Market is closed, skipping first scrape.");
         }
