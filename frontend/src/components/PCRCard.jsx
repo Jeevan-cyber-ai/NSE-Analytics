@@ -69,30 +69,30 @@ const PCRCard = ({ data }) => {
       </div>
 
       {/* Volume PCR */}
-      <div className="hidden md:flex flex-col items-end px-6 py-3 bg-slate-800/80 rounded-2xl border border-white/5 shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 ring-1 ring-white/5 hover:ring-indigo-500/30">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pt-1">Volume PCR</span>
+      <div className="flex flex-col items-end px-3 py-2 md:px-6 md:py-3 bg-slate-800/80 rounded-xl md:rounded-2xl border border-white/5 shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 ring-1 ring-white/5 hover:ring-indigo-500/30">
+        <div className="flex items-center gap-2 mb-0.5 md:mb-1">
+          <span className="text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest pt-0.5 md:pt-1">Volume PCR</span>
         </div>
-        <div className="flex items-end gap-3">
-          <span className="text-2xl font-black text-indigo-300 tabular-nums">
+        <div className="flex items-end gap-1.5 md:gap-3">
+          <span className="text-lg md:text-2xl font-black text-indigo-300 tabular-nums">
             {volPcr}
           </span>
-          <p className="text-[10px] font-semibold text-indigo-400/60 mb-1">
+          <p className="text-[8px] md:text-[10px] font-semibold text-indigo-400/60 mb-0.5 md:mb-1 hidden sm:block">
             Activity
           </p>
         </div>
       </div>
 
       {/* Max Pain */}
-      <div className="hidden lg:flex flex-col items-end px-6 py-3 bg-slate-800/80 rounded-2xl border border-white/5 shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 ring-1 ring-white/5 hover:ring-indigo-500/30">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pt-1">Max Pain</span>
+      <div className="flex flex-col items-end px-3 py-2 md:px-6 md:py-3 bg-slate-800/80 rounded-xl md:rounded-2xl border border-white/5 shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 ring-1 ring-white/5 hover:ring-indigo-500/30">
+        <div className="flex items-center gap-2 mb-0.5 md:mb-1">
+          <span className="text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest pt-0.5 md:pt-1">Max Pain</span>
         </div>
-        <div className="flex items-end gap-3">
-          <span className="text-2xl font-black text-slate-100 tabular-nums">
+        <div className="flex items-end gap-1.5 md:gap-3">
+          <span className="text-lg md:text-2xl font-black text-slate-100 tabular-nums">
             {maxPainStrike?.toLocaleString('en-IN', { minimumFractionDigits: 0 })}
           </span>
-          <p className="text-[10px] font-semibold text-slate-500 mb-1">
+          <p className="text-[8px] md:text-[10px] font-semibold text-slate-500 mb-0.5 md:mb-1 hidden sm:block">
              Settlement
           </p>
         </div>

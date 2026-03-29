@@ -24,8 +24,11 @@ const OptionTable = ({ data }) => {
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
               LIVE
             </span>
-            <span className="text-xs uppercase tracking-widest text-slate-500">
-              {data.marketDate} • {data.timestamp} • {data.expiryDate}
+            <span className="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-lg text-xs font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(99,102,241,0.1)]">
+              EXPIRY: {data.expiryDate}
+            </span>
+            <span className="text-xs uppercase tracking-widest text-slate-500 ml-1">
+              {data.marketDate} • {data.timestamp}
             </span>
           </div>
         </div>
