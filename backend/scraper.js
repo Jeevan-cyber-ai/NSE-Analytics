@@ -80,9 +80,11 @@ async function scrapeNSE() {
             return;
         }
 
-        const rows = apiPacket.records.data; // Save ALL expiries, not just filtered
-        const expiryDates = apiPacket.records.expiryDates || [];
+        const allExpiryDates = apiPacket.records.expiryDates || [];
+        // Only save the nearest 4 expiries to wildly save Database size instead of saving all 50!
+        const expiryDates = allExpiryDates.slice(0, 4); 
         const expiryDate = expiryDates[0] || 'N/A'; // Legacy field backwards compatibility
+        const rows = apiPacket.records.data.filter(r => expiryDates.includes(r.expiryDate)); 
         const underlyingValue = apiPacket.records.underlyingValue;
 
         const dataRows = rows
