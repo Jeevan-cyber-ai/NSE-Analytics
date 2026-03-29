@@ -3,10 +3,12 @@ const mongoose = require('mongoose');
 const SnapshotSchema = new mongoose.Schema({
     marketDate: { type: String, required: true }, // Format: YYYY-MM-DD
     timestamp: { type: String, required: true },  // Format: "23-Mar-2026 15:30:00"
-    expiryDate: { type: String, required: true },
+    expiryDate: { type: String, required: false }, // Backwards compatibility for single string
+    expiryDates: [{ type: String }], // To store all available expiries
     underlyingValue: Number,
     data: [{
         strikePrice: Number,
+        expiryDate: String, // Ensure each row stores its expiry date
         // Calls (CE)
         ceOI: Number,
         ceChngOI: Number,

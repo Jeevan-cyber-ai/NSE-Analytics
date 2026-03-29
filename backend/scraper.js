@@ -35,7 +35,7 @@ async function scrapeNSE() {
     try {
         await page.setCacheEnabled(false); // <--- DISABLE CACHE: Fixes stuck at yesterday issue
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
-        
+
         let apiPacket = null;
 
         // Set up interception
@@ -59,13 +59,13 @@ async function scrapeNSE() {
 
         // Visit NSE page which triggers the API call
         console.log('[SCRAPER] Navigating to Option Chain Page...');
-        await page.goto('https://www.nseindia.com/option-chain', { 
-            waitUntil: 'networkidle0', 
-            timeout: 90000 
+        await page.goto('https://www.nseindia.com/option-chain', {
+            waitUntil: 'networkidle0',
+            timeout: 90000
         });
 
         // Wait for the packet to be captured
-        for(let i=0; i<15 && !apiPacket; i++) {
+        for (let i = 0; i < 15 && !apiPacket; i++) {
             await new Promise(r => setTimeout(r, 1000));
         }
 
@@ -80,14 +80,16 @@ async function scrapeNSE() {
             return;
         }
 
-        const rows = apiPacket.filtered?.data || apiPacket.records.data;
-        const expiryDate = rows[0]?.expiryDate || 'N/A';
+        const rows = apiPacket.records.data; // Save ALL expiries, not just filtered
+        const expiryDates = apiPacket.records.expiryDates || [];
+        const expiryDate = expiryDates[0] || 'N/A'; // Legacy field backwards compatibility
         const underlyingValue = apiPacket.records.underlyingValue;
 
         const dataRows = rows
             .filter(r => r.strikePrice)
             .map(r => ({
                 strikePrice: r.strikePrice,
+                expiryDate: r.expiryDate, // Row specific expiry
                 // CE (Calls)
                 ceOI: r.CE?.openInterest || 0,
                 ceChngOI: r.CE?.changeinOpenInterest || 0,
@@ -116,7 +118,7 @@ async function scrapeNSE() {
         const month = String(istTime.getMonth() + 1).padStart(2, '0');
         const day = String(istTime.getDate()).padStart(2, '0');
         const marketDate = `${year}-${month}-${day}`;
-        const snapshot = new Snapshot({ marketDate, timestamp: currentTS, expiryDate, underlyingValue, data: dataRows });
+        const snapshot = new Snapshot({ marketDate, timestamp: currentTS, expiryDate, expiryDates, underlyingValue, data: dataRows });
         await snapshot.save();
 
         lastTimestamp = currentTS;
@@ -130,3 +132,5 @@ async function scrapeNSE() {
 }
 
 module.exports = { scrapeNSE };
+
+

@@ -1,14 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Info, Activity } from 'lucide-react';
 import PCRCard from './PCRCard';
 
 const OptionTable = ({ data }) => {
+  const availableExpiries = data?.expiryDates?.length > 0 
+    ? data.expiryDates 
+    : [...new Set(data?.data?.map(r => r.expiryDate).filter(Boolean))];
+
+  const [selectedExpiry, setSelectedExpiry] = useState(data?.expiryDate || 'N/A');
+
+  useEffect(() => {
+    // Keep selection in sync when snapshot data changes
+    if (availableExpiries.length > 0 && !availableExpiries.includes(selectedExpiry)) {
+      setSelectedExpiry(availableExpiries[0]);
+    } else if (availableExpiries.length === 0 && data?.expiryDate) {
+      setSelectedExpiry(data.expiryDate);
+    }
+  }, [data, availableExpiries, selectedExpiry]);
+
   if (!data) return (
     <div className="flex flex-col items-center justify-center p-20 bg-slate-900/40 rounded-3xl border border-white/5 backdrop-blur-xl">
       <Activity className="text-indigo-500 animate-spin mb-4" size={40} />
       <p className="text-slate-400 font-medium">Loading Real-Time NSE Data...</p>
     </div>
   );
+
+  // Filter rows specific to the selected expiry (or fallback to all if legacy data)
+  const filteredData = data.data.filter(r => r.expiryDate === selectedExpiry || !r.expiryDate);
 
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -24,9 +42,24 @@ const OptionTable = ({ data }) => {
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
               LIVE
             </span>
-            <span className="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-lg text-xs font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(99,102,241,0.1)]">
-              EXPIRY: {data.expiryDate}
-            </span>
+            {availableExpiries.length > 1 ? (
+              <select 
+                title="Select Expiry" 
+                value={selectedExpiry}
+                onChange={(e) => setSelectedExpiry(e.target.value)}
+                className="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-lg text-xs font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(99,102,241,0.1)] outline-none cursor-pointer hover:bg-indigo-500/20 transition-all"
+              >
+                {availableExpiries.map(exp => (
+                  <option key={exp} value={exp} className="bg-slate-900 text-indigo-300">
+                    EXPIRY: {exp}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-lg text-xs font-bold tracking-widest uppercase shadow-[0_0_10px_rgba(99,102,241,0.1)]">
+                EXPIRY: {selectedExpiry || "N/A"}
+              </span>
+            )}
             <span className="text-xs uppercase tracking-widest text-slate-500 ml-1">
               {data.marketDate} • {data.timestamp}
             </span>
@@ -41,7 +74,7 @@ const OptionTable = ({ data }) => {
               {data.underlyingValue?.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </div>
           </div>
-          <PCRCard data={data.data} />
+          <PCRCard data={filteredData} />
         </div>
       </div>
 
@@ -84,7 +117,7 @@ const OptionTable = ({ data }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5 font-semibold">
-            {data.data.map((row, idx) => {
+            {filteredData.map((row, idx) => {
               const underlying = data.underlyingValue || 0;
               const isATM = Math.abs(underlying - row.strikePrice) < 50;
               const isCallITM = row.strikePrice < underlying;
