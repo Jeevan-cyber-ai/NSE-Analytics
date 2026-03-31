@@ -1,0 +1,58 @@
+{
+  "expiryDates": [
+    "30-Mar-2026",
+    "07-Apr-2026",
+    "13-Apr-2026",
+    "21-Apr-2026",
+    "28-Apr-2026",
+    "05-May-2026",
+    "26-May-2026",
+    "30-Jun-2026",
+    "29-Sep-2026",
+    "29-Dec-2026",
+    "29-Jun-2027",
+    "28-Dec-2027",
+    "27-Jun-2028",
+    "26-Dec-2028",
+    "26-Jun-2029",
+    "24-Dec-2029",
+    "25-Jun-2030",
+    "31-Dec-2030"
+  ],
+  "totalRows": 164,
+  "sampleRows": [
+    {
+      "rootKeys": [
+        "expiryDates",
+        "CE",
+        "PE",
+        "strikePrice"
+      ],
+      "expiryDates": "30-Mar-2026",
+      "strikePrice": 19000,
+      "CE_expiryDate": "30-03-2026"
+    },
+    {
+      "rootKeys": [
+        "expiryDates",
+        "CE",
+        "PE",
+        "strikePrice"
+      ],
+      "expiryDates": "30-Mar-2026",
+      "strikePrice": 20000,
+      "CE_expiryDate": "30-03-2026"
+    },
+    {
+      "rootKeys": [
+        "expiryDates",
+        "CE",
+        "PE",
+        "strikePrice"
+      ],
+      "expiryDates": "30-Mar-2026",
+      "strikePrice": 20200,
+      "CE_expiryDate": null
+    }
+  ]
+}

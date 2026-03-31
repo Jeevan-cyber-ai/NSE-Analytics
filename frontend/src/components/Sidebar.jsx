@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Calendar, Clock, ChevronDown, ChevronRight, X } from 'lucide-react';
 
-const Sidebar = ({ dates, selectedDate, onSelectDate, timestamps, onSelectSnapshot, currentSnapshotId, isOpen, onClose }) => {
+const Sidebar = ({ dates, selectedDate, onSelectDate, expiries, selectedExpiry, onSelectExpiry, timestamps, onSelectSnapshot, currentSnapshotId, isOpen, onClose }) => {
   return (
     <aside className={`
       fixed inset-y-0 left-0 z-50 w-80 bg-slate-800 border-r border-slate-700 flex flex-col h-full shadow-2xl transition-transform duration-300 ease-in-out
@@ -22,18 +22,42 @@ const Sidebar = ({ dates, selectedDate, onSelectDate, timestamps, onSelectSnapsh
           </button>
         </div>
         
-        <div className="relative">
-          <select 
-            className="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500 appearance-none text-slate-200"
-            value={selectedDate}
-            onChange={(e) => onSelectDate(e.target.value)}
-          >
-            {dates.map(date => (
-              <option key={date} value={date}>{date}</option>
-            ))}
-          </select>
-          <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-            <ChevronDown size={18} className="text-slate-500" />
+        <div className="space-y-3">
+          {/* Market Date Dropdown */}
+          <div className="relative">
+            <select 
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500 appearance-none text-slate-200"
+              value={selectedDate}
+              onChange={(e) => onSelectDate(e.target.value)}
+            >
+              {dates.map(date => (
+                <option key={date} value={date}>{date}</option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+              <ChevronDown size={18} className="text-slate-500" />
+            </div>
+          </div>
+
+          {/* Expiry Date Dropdown */}
+          <div className="relative">
+            <select 
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500 appearance-none text-slate-200"
+              value={selectedExpiry}
+              onChange={(e) => onSelectExpiry(e.target.value)}
+              disabled={!expiries || expiries.length === 0}
+            >
+              {(!expiries || expiries.length === 0) ? (
+                <option value="">No Expiries</option>
+              ) : (
+                expiries.map(expiry => (
+                  <option key={expiry} value={expiry}>Expiry: {expiry}</option>
+                ))
+              )}
+            </select>
+            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+              <ChevronDown size={18} className="text-slate-500" />
+            </div>
           </div>
         </div>
       </div>

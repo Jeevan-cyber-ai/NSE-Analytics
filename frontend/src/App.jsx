@@ -9,6 +9,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 function App() {
   const [dates, setDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
+  const [expiries, setExpiries] = useState([]);
+  const [selectedExpiry, setSelectedExpiry] = useState('');
   const [timestamps, setTimestamps] = useState([]);
   const [selectedSnapshot, setSelectedSnapshot] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,9 +45,23 @@ function App() {
 
   useEffect(() => {
     if (!selectedDate) return;
+    axios.get(`${API_BASE_URL}/expiries?date=${selectedDate}`)
+      .then(res => {
+        setExpiries(res.data);
+        if (res.data.length > 0) {
+          setSelectedExpiry(res.data[0]);
+        } else {
+          setSelectedExpiry('');
+          setTimestamps([]); // Clear if no expiries
+        }
+      });
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (!selectedDate || !selectedExpiry) return;
 
     const fetchTimestamps = () => {
-      axios.get(`${API_BASE_URL}/timestamps?date=${selectedDate}`)
+      axios.get(`${API_BASE_URL}/timestamps?date=${selectedDate}&expiry=${selectedExpiry}`)
         .then(res => {
           setTimestamps(prev => {
             const newTimestamps = res.data;
@@ -72,7 +88,7 @@ function App() {
     const interval = setInterval(fetchTimestamps, 30000); // Poll every 30 seconds
 
     return () => clearInterval(interval);
-  }, [selectedDate, isLiveTracking]);
+  }, [selectedDate, selectedExpiry, isLiveTracking]);
 
   return (
     <div className="flex bg-slate-900 text-white min-h-screen overflow-hidden relative">
@@ -88,6 +104,9 @@ function App() {
         dates={dates} 
         selectedDate={selectedDate} 
         onSelectDate={setSelectedDate}
+        expiries={expiries}
+        selectedExpiry={selectedExpiry}
+        onSelectExpiry={setSelectedExpiry}
         timestamps={timestamps}
         onSelectSnapshot={fetchSnapshot}
         currentSnapshotId={selectedSnapshot?._id}
