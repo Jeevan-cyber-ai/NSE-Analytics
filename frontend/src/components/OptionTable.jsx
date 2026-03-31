@@ -2,7 +2,54 @@ import React, { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Info, Activity } from 'lucide-react';
 import PCRCard from './PCRCard';
 
+const HeaderWithTooltip = ({ title, description, className = "", align = "center" }) => {
+  const alignClasses = {
+    center: "left-1/2 -translate-x-1/2",
+    left: "left-0 translate-x-0",
+    right: "right-0 translate-x-0"
+  };
+  
+  const arrowClasses = {
+    center: "left-1/2 -translate-x-1/2",
+    left: "left-4 translate-x-0",
+    right: "right-4 translate-x-0"
+  };
+
+  return (
+    <th className={`group/header relative py-2.5 transition-colors cursor-help hover:bg-white/5 ${className}`}>
+      <div className="flex items-center justify-center gap-1">
+        {title}
+        <Info size={10} className="text-slate-500 opacity-0 group-hover/header:opacity-100 transition-opacity" />
+      </div>
+      <div className={`absolute top-full ${alignClasses[align]} mt-2 w-64 p-3 bg-slate-800 border border-white/10 rounded-xl text-[11px] normal-case font-medium text-slate-300 opacity-0 group-hover/header:opacity-100 pointer-events-none transition-all duration-300 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] backdrop-blur-xl`}>
+        <div className="text-indigo-400 font-bold mb-1.5 border-b border-white/5 pb-1.5 flex items-center justify-between">
+          {title}
+          <Info size={10} className="text-indigo-500/50" />
+        </div>
+        <div className="leading-relaxed">
+          {description}
+        </div>
+        <div className={`absolute bottom-full ${arrowClasses[align]} border-[6px] border-transparent border-b-slate-800`}></div>
+      </div>
+    </th>
+  );
+};
+
 const OptionTable = ({ data }) => {
+  const columnDescriptions = {
+    OI: "Open Interest is the total number of outstanding option contracts that have not been settled. It shows market liquidity and position concentration.",
+    CHNG_OI: "The net change in Open Interest for the day. Positive change indicates new traders entering; negative change shows positions being closed.",
+    VOLUME: "The total number of contracts traded during the current session. High volume indicates intense trading activity and interest at this price.",
+    IV: "Implied Volatility represents the market's expectation of future volatility, directly impacting the option premium price.",
+    LTP: "Last Traded Price is the most recent market price for the option, reflecting its current market value.",
+    CHNG: "Price Change represents the net difference in price from the previous day's closing price, showing daily price movement.",
+    BID_QTY: "The total number of contracts that buyers are currently willing to buy at the Bid price.",
+    BID: "The highest price a buyer is currently willing to pay for an option contract.",
+    ASK: "The lowest price a seller is currently willing to accept for an option contract.",
+    ASK_QTY: "The total number of contracts currently available for sale at the Ask price.",
+    STRIKE: "The fixed price at which the buyer can exercise their option to buy (Call) or sell (Put) the underlying Nifty index."
+  };
+
   const availableExpiries = data?.expiryDates?.length > 0 
     ? data.expiryDates 
     : [...new Set(data?.data?.map(r => r.expiryDate).filter(Boolean))];
@@ -88,31 +135,31 @@ const OptionTable = ({ data }) => {
               <th colSpan="11" className="px-4 py-2 text-center text-rose-300 font-black border-l border-white/5 uppercase tracking-[0.2em]">Puts</th>
             </tr>
             {/* Main Headers - Exactly matching the image */}
-            <tr className="bg-slate-800/50 text-center border-b border-white/10 sticky top-0 z-10 backdrop-blur-md">
+            <tr className="bg-slate-800/50 text-center border-b border-white/10 sticky top-0 z-40 backdrop-blur-md">
               <th className="w-10 py-2.5 border-r border-white/5"></th>
-              <th className="w-20 py-2.5">OI</th>
-              <th className="w-16 py-2.5">CHNG OI</th>
-              <th className="w-20 py-2.5">VOLUME</th>
-              <th className="w-12 py-2.5">IV</th>
-              <th className="w-20 py-2.5">LTP</th>
-              <th className="w-16 py-2.5">CHNG</th>
-              <th className="w-16 py-2.5">BID QTY</th>
-              <th className="w-16 py-2.5">BID</th>
-              <th className="w-16 py-2.5">ASK</th>
-              <th className="w-16 py-2.5 border-r border-white/5">ASK QTY</th>
+              <HeaderWithTooltip title="OI" description={columnDescriptions.OI} className="w-20" align="left" />
+              <HeaderWithTooltip title="CHNG OI" description={columnDescriptions.CHNG_OI} className="w-16" align="left" />
+              <HeaderWithTooltip title="VOLUME" description={columnDescriptions.VOLUME} className="w-20" />
+              <HeaderWithTooltip title="IV" description={columnDescriptions.IV} className="w-12" />
+              <HeaderWithTooltip title="LTP" description={columnDescriptions.LTP} className="w-20" />
+              <HeaderWithTooltip title="CHNG" description={columnDescriptions.CHNG} className="w-16" />
+              <HeaderWithTooltip title="BID QTY" description={columnDescriptions.BID_QTY} className="w-16" />
+              <HeaderWithTooltip title="BID" description={columnDescriptions.BID} className="w-16" />
+              <HeaderWithTooltip title="ASK" description={columnDescriptions.ASK} className="w-16" />
+              <HeaderWithTooltip title="ASK QTY" description={columnDescriptions.ASK_QTY} className="w-16 border-r border-white/5" />
               
-              <th className="w-24 py-2.5 bg-slate-700/80 text-white font-black">STRIKE</th>
+              <HeaderWithTooltip title="STRIKE" description={columnDescriptions.STRIKE} className="w-24 bg-slate-700/80 text-white font-black" />
               
-              <th className="w-16 py-2.5 border-l border-white/5">BID QTY</th>
-              <th className="w-16 py-2.5">BID</th>
-              <th className="w-16 py-2.5">ASK</th>
-              <th className="w-16 py-2.5">ASK QTY</th>
-              <th className="w-16 py-2.5">CHNG</th>
-              <th className="w-20 py-2.5">LTP</th>
-              <th className="w-12 py-2.5">IV</th>
-              <th className="w-20 py-2.5">VOLUME</th>
-              <th className="w-16 py-2.5">CHNG OI</th>
-              <th className="w-20 py-2.5">OI</th>
+              <HeaderWithTooltip title="BID QTY" description={columnDescriptions.BID_QTY} className="w-16 border-l border-white/5" />
+              <HeaderWithTooltip title="BID" description={columnDescriptions.BID} className="w-16" />
+              <HeaderWithTooltip title="ASK" description={columnDescriptions.ASK} className="w-16" />
+              <HeaderWithTooltip title="ASK QTY" description={columnDescriptions.ASK_QTY} className="w-16" />
+              <HeaderWithTooltip title="CHNG" description={columnDescriptions.CHNG} className="w-16" />
+              <HeaderWithTooltip title="LTP" description={columnDescriptions.LTP} className="w-20" />
+              <HeaderWithTooltip title="IV" description={columnDescriptions.IV} className="w-12" />
+              <HeaderWithTooltip title="VOLUME" description={columnDescriptions.VOLUME} className="w-20" />
+              <HeaderWithTooltip title="CHNG OI" description={columnDescriptions.CHNG_OI} className="w-16" align="right" />
+              <HeaderWithTooltip title="OI" description={columnDescriptions.OI} className="w-20" align="right" />
               <th className="w-10 py-2.5 border-l border-white/5"></th>
             </tr>
           </thead>
