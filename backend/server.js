@@ -26,14 +26,22 @@ mongoose.connection.on("connected", () => console.log("🚀 MongoDB connection e
 
 // ─── API Routes ────────────────────────────────────────────────────────────────
 
+let isScraping = false;
+
 // Trigger manual scrape
 app.get('/api/scrape', async (req, res) => {
+    if (isScraping) {
+        return res.status(429).send("⚠️ Scraper is already running. Please wait.");
+    }
     try {
+        isScraping = true;
         await scrapeNSE();
         res.status(200).send("✅ Scraping completed successfully");
     } catch (err) {
         console.error("Manual Scraper Error:", err.message);
         res.status(500).send("❌ Scraping failed: " + err.message);
+    } finally {
+        isScraping = false;
     }
 });
 
@@ -111,24 +119,39 @@ app.listen(PORT, () => {
         return isWeekday && isSessionTime;
     };
 
-    console.log("⏱️  Automatic scraper scheduler starting (Checking every 1 min)...");
+    console.log("⏱️  Automatic scraper scheduler starting (Checking every 5 mins)...");
 
     setInterval(async () => {
         if (!isMarketOpen()) {
             console.log(`[IDLE] ${new Date().toLocaleTimeString()} - Market is closed. Skipping scrape.`);
             return;
         }
+        if (isScraping) {
+            console.log("[SCRAPER] ⚠️ Scrape already in progress. Skipping this interval.");
+            return;
+        }
+
         try {
             console.log("[CRON] Market is open. Auto-triggering Scraper...");
+            isScraping = true;
             await scrapeNSE();
         } catch (err) {
             console.error("❌ Auto-Scraper error:", err.message);
+        } finally {
+            isScraping = false;
         }
-    }, 60000);
+    }, 300000); // 5 minutes
 
     (async () => {
         if (isMarketOpen()) {
-            try { await scrapeNSE(); } catch (e) { console.error(e.message); }
+            try { 
+                isScraping = true;
+                await scrapeNSE(); 
+            } catch (e) { 
+                console.error(e.message); 
+            } finally {
+                isScraping = false;
+            }
         } else {
             console.log("⏭️  Initial check: Market is closed, skipping first scrape.");
         }

@@ -32,6 +32,7 @@ async function scrapeNSE() {
 
     const page = await browser.newPage();
     try {
+        await page.setDefaultTimeout(60000);
         await page.setCacheEnabled(false);
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
 
@@ -56,10 +57,15 @@ async function scrapeNSE() {
         });
 
         console.log('[SCRAPER] Navigating to Option Chain Page...');
-        await page.goto('https://www.nseindia.com/option-chain', {
-            waitUntil: 'networkidle0',
-            timeout: 90000
-        });
+        try {
+            await page.goto('https://www.nseindia.com/option-chain', {
+                waitUntil: 'networkidle0',
+                timeout: 60000
+            });
+        } catch (gotoErr) {
+            console.warn(`[SCRAPER] ⚠️ Page navigation timed out or failed: ${gotoErr.message}`);
+            // We might still have intercepted the packet even if networkidle wasn't reached
+        }
 
         // Wait up to 15s for the packet
         for (let i = 0; i < 15 && !apiPacket; i++) {
