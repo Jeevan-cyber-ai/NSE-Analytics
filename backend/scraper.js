@@ -147,9 +147,14 @@ async function scrapeNSE() {
                 }));
 
             if (dataRows.length > 0 && expiryDate !== 'N/A') {
-                await Snapshot.create({ marketDate, timestamp: currentTS, expiryDate, underlyingValue, data: dataRows });
-                totalStrikesSaved += dataRows.length;
-                console.log(`[SCRAPER] ✅ SAVED [${expiryDate}]: ${currentTS} (${dataRows.length} strikes)`);
+                const exists = await Snapshot.exists({ marketDate, timestamp: currentTS, expiryDate });
+                if (!exists) {
+                    await Snapshot.create({ marketDate, timestamp: currentTS, expiryDate, underlyingValue, data: dataRows });
+                    totalStrikesSaved += dataRows.length;
+                    console.log(`[SCRAPER] ✅ SAVED [${expiryDate}]: ${currentTS} (${dataRows.length} strikes)`);
+                } else {
+                    console.log(`[SCRAPER] ⏭️ Already exists in DB [${expiryDate}]: ${currentTS}`);
+                }
             }
         }
 

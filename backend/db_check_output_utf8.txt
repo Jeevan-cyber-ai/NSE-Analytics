@@ -1,0 +1,8 @@
+﻿Distinct Market Dates (Raw): [ '2026-03-30', '2026-03-31', '2026-04-01' ]
+Sorted Dates (Latest First): [ '2026-04-01', '2026-03-31', '2026-03-30' ]
+Date: 2026-04-01, Count: 268, Expiries: 07-Apr-2026, 13-Apr-2026, 21-Apr-2026, 28-Apr-2026
+  Latest TS for 2026-04-01: 01-Apr-2026 10:09:10
+Date: 2026-03-31, Count: 21, Expiries: 07-Apr-2026, 13-Apr-2026, 21-Apr-2026, 30-Mar-2026
+  Latest TS for 2026-03-31: 30-Mar-2026 15:30:00
+Date: 2026-03-30, Count: 4, Expiries: 07-Apr-2026, 13-Apr-2026, 21-Apr-2026, 30-Mar-2026
+  Latest TS for 2026-03-30: 30-Mar-2026 15:30:00

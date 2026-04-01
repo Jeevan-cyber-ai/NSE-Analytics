@@ -71,10 +71,13 @@ app.get('/api/timestamps', async (req, res) => {
         const query = { marketDate: date };
         if (expiry) query.expiryDate = expiry;
 
-        const timestamps = await Snapshot.find(query)
-            .sort({ timestamp: 1 })
+        let snapshots = await Snapshot.find(query)
             .select('_id timestamp expiryDate');
-        res.json(timestamps);
+        
+        // Final manual sort to ensure latest is ALWAYS at the top
+        snapshots.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+            
+        res.json(snapshots);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

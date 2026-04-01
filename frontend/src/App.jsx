@@ -22,7 +22,7 @@ function App() {
     axios.get(`${API_BASE_URL}/dates`)
       .then(res => {
         setDates(res.data);
-        if (res.data.length > 0) setSelectedDate(res.data[res.data.length - 1]);
+        if (res.data.length > 0) setSelectedDate(res.data[0]);
       });
   }, []);
 
@@ -91,7 +91,7 @@ function App() {
   }, [selectedDate, selectedExpiry, isLiveTracking]);
 
   return (
-    <div className="flex bg-slate-900 text-white min-h-screen overflow-hidden relative">
+    <div className="flex bg-slate-900 text-white h-screen overflow-hidden relative font-inter">
       {/* Sidebar Overlay for Mobile */}
       {isSidebarOpen && (
         <div 
