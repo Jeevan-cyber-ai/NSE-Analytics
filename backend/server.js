@@ -140,7 +140,7 @@ app.listen(PORT, () => {
         } finally {
             isScraping = false;
         }
-    }, 300000); // 5 minutes
+    }, 60000); // 1 minute
 
     (async () => {
         if (isMarketOpen()) {

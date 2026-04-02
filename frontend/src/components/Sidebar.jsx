@@ -1,7 +1,6 @@
-import { useState } from 'react';
-import { Calendar, Clock, ChevronDown, ChevronRight, X } from 'lucide-react';
+import { Calendar, Clock, ChevronDown, ChevronRight, X, RefreshCw } from 'lucide-react';
 
-const Sidebar = ({ dates, selectedDate, onSelectDate, expiries, selectedExpiry, onSelectExpiry, timestamps, onSelectSnapshot, currentSnapshotId, isOpen, onClose }) => {
+const Sidebar = ({ dates, selectedDate, onSelectDate, expiries, selectedExpiry, onSelectExpiry, timestamps, onSelectSnapshot, currentSnapshotId, isOpen, onClose, isScraping, onManualRefresh }) => {
   return (
     <aside className={`
       fixed inset-y-0 left-0 z-50 w-80 bg-slate-800 border-r border-slate-700 flex flex-col h-full shadow-2xl transition-transform duration-300 ease-in-out
@@ -14,12 +13,22 @@ const Sidebar = ({ dates, selectedDate, onSelectDate, expiries, selectedExpiry, 
             <Calendar className="text-indigo-400" size={24} />
             <span>Historical Logs</span>
           </h2>
-          <button 
-            onClick={onClose}
-            className="lg:hidden p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={onManualRefresh}
+              disabled={isScraping}
+              title="Refresh Data"
+              className={`p-2 transition-all duration-500 rounded-lg ${isScraping ? 'bg-indigo-600/20 text-indigo-400' : 'hover:bg-slate-700 text-slate-400 hover:text-indigo-400'}`}
+            >
+              <RefreshCw size={18} className={isScraping ? 'animate-spin' : ''} />
+            </button>
+            <button 
+              onClick={onClose}
+              className="lg:hidden p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
         
         <div className="space-y-3">

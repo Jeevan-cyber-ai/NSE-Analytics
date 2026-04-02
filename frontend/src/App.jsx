@@ -14,8 +14,46 @@ function App() {
   const [timestamps, setTimestamps] = useState([]);
   const [selectedSnapshot, setSelectedSnapshot] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isScraping, setIsScraping] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLiveTracking, setIsLiveTracking] = useState(true); // Track if user is watching the latest
+
+  const fetchTimestamps = () => {
+    if (!selectedDate || !selectedExpiry) return;
+    axios.get(`${API_BASE_URL}/timestamps?date=${selectedDate}&expiry=${selectedExpiry}`)
+      .then(res => {
+        setTimestamps(prev => {
+          const newTimestamps = res.data;
+          
+          if (newTimestamps.length > 0) {
+            const latestNewId = newTimestamps[0]._id;
+            const latestOldId = prev.length > 0 ? prev[0]._id : null;
+            
+            if (latestNewId !== latestOldId) {
+              if (!latestOldId || isLiveTracking) {
+                fetchSnapshot(latestNewId);
+                setIsLiveTracking(true);
+              }
+            }
+          }
+          return newTimestamps;
+        });
+      });
+  };
+
+  const triggerManualScrape = () => {
+    if (isScraping) return;
+    setIsScraping(true);
+    axios.get(`${API_BASE_URL}/scrape`)
+      .then(res => {
+        setIsScraping(false);
+        fetchTimestamps();
+      })
+      .catch(err => {
+        setIsScraping(false);
+        console.error("Manual Scrape Error:", err.message);
+      });
+  };
 
   useEffect(() => {
     // Fetch initial dates
@@ -28,10 +66,9 @@ function App() {
 
   const fetchSnapshot = (id, isUserClick = false) => {
     if (isUserClick) {
-      // If user clicked manually, check if it's the latest one to enable/disable live tracking
       const isLatest = timestamps.length > 0 && timestamps[0]._id === id;
       setIsLiveTracking(isLatest);
-      setIsSidebarOpen(false); // Auto close sidebar on mobile after selection
+      setIsSidebarOpen(false); 
     }
     
     setIsLoading(true);
@@ -52,41 +89,14 @@ function App() {
           setSelectedExpiry(res.data[0]);
         } else {
           setSelectedExpiry('');
-          setTimestamps([]); // Clear if no expiries
+          setTimestamps([]);
         }
       });
   }, [selectedDate]);
 
   useEffect(() => {
-    if (!selectedDate || !selectedExpiry) return;
-
-    const fetchTimestamps = () => {
-      axios.get(`${API_BASE_URL}/timestamps?date=${selectedDate}&expiry=${selectedExpiry}`)
-        .then(res => {
-          setTimestamps(prev => {
-            const newTimestamps = res.data;
-            
-            // If we got new data and we are in live tracking mode, auto-fetch the new latest snapshot
-            if (newTimestamps.length > 0) {
-              const latestNewId = newTimestamps[0]._id;
-              const latestOldId = prev.length > 0 ? prev[0]._id : null;
-              
-              if (latestNewId !== latestOldId) {
-                // Only if it's the first load OR if user is actively live tracking
-                if (!latestOldId || isLiveTracking) {
-                  fetchSnapshot(latestNewId);
-                  setIsLiveTracking(true);
-                }
-              }
-            }
-            return newTimestamps;
-          });
-        });
-    };
-
-    fetchTimestamps(); // Fetch immediately
-    const interval = setInterval(fetchTimestamps, 30000); // Poll every 30 seconds
-
+    fetchTimestamps();
+    const interval = setInterval(fetchTimestamps, 30000); 
     return () => clearInterval(interval);
   }, [selectedDate, selectedExpiry, isLiveTracking]);
 
@@ -112,6 +122,8 @@ function App() {
         currentSnapshotId={selectedSnapshot?._id}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        isScraping={isScraping}
+        onManualRefresh={triggerManualScrape}
       />
       
       <main className="flex-1 flex flex-col p-4 md:p-6 overflow-auto bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent)]">
