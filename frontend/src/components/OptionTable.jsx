@@ -125,17 +125,17 @@ const OptionTable = ({ data }) => {
         </div>
       </div>
 
-      <div className="relative overflow-x-auto rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl shadow-2xl ring-1 ring-white/5 custom-scrollbar pb-4">
+      <div className="relative overflow-visible rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl shadow-2xl ring-1 ring-white/5 pb-4 max-h-[calc(100vh-180px)] overflow-y-auto overflow-x-auto custom-scrollbar">
         <table className="w-full text-[11px] text-left text-slate-300 border-collapse table-fixed min-w-[1500px]">
           <thead className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
             {/* Header Categories */}
-            <tr className="border-b border-white/5 bg-slate-800/80 sticky top-0 z-50 backdrop-blur-md">
-              <th colSpan="11" className="px-4 py-2 text-center text-indigo-300 font-black border-r border-white/5 uppercase tracking-[0.2em]">Calls</th>
-              <th className="px-2 py-2 text-center text-white bg-slate-800 font-black uppercase tracking-[0.2em] sticky top-0">Strike</th>
-              <th colSpan="11" className="px-4 py-2 text-center text-rose-300 font-black border-l border-white/5 uppercase tracking-[0.2em]">Puts</th>
+            <tr className="border-b border-white/5 bg-slate-800/90 sticky top-0 z-[60] backdrop-blur-md">
+              <th colSpan="11" className="px-4 py-2.5 text-center text-indigo-300 font-black border-r border-white/5 uppercase tracking-[0.2em]">Calls</th>
+              <th className="px-2 py-2.5 text-center text-white bg-slate-800 font-black uppercase tracking-[0.2em] sticky top-0 z-[60]">Strike</th>
+              <th colSpan="11" className="px-4 py-2.5 text-center text-rose-300 font-black border-l border-white/5 uppercase tracking-[0.2em]">Puts</th>
             </tr>
             {/* Main Headers - Exactly matching the image */}
-            <tr className="bg-slate-800/90 text-center border-b border-white/10 sticky top-[33px] z-40 backdrop-blur-md">
+            <tr className="bg-slate-800/95 text-center border-b border-white/10 sticky top-[36px] z-[50] backdrop-blur-md">
               <th className="w-10 py-2.5 border-r border-white/5"></th>
               <HeaderWithTooltip title="OI" description={columnDescriptions.OI} className="w-20" align="left" />
               <HeaderWithTooltip title="CHNG OI" description={columnDescriptions.CHNG_OI} className="w-16" align="left" />
